@@ -1,5 +1,9 @@
 # EKA - Elasticsearch K8s Automator
 
+https://jira.exxeta.com/browse/SWEMTS-48549
+
+Achtung: Noch nicht produktiv einsetzbar
+
 
 Ziel ist es den Rollout von Elasticsearch Indices für Filebeat und
 Metricbeat zu automatisieren.
