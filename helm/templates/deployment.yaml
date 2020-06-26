@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "java-k8s-operator.fullname" . }}
+  labels:
+{{ include "java-k8s-operator.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "java-k8s-operator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "java-k8s-operator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ template "java-k8s-operator.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        
+      volumes:
+        - name: elastic-cert
+          secret:
+            secretName: elastic-certificate-pem
+        - name: truststore
+        - name: efk-controller-logs
+      initContainers:
+        - name: {{ .Chart.Name }}-truststore
+          image: exxeta/adoptopenjdk:8
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: elastic-cert
+              mountPath: /tmp/elastic-cert
+              readOnly: true
+            - name: truststore
+              mountPath: /tmp/truststore
+          command:
+          - sh
+          - -c
+          - |
+            #!/bin/bash
+            echo Creating Truststore
+            echo Convert .pem to .der
+            
+            cert_in=/tmp/elastic-cert/elastic-certificate.pem
+            cert_out=/tmp/truststore/elastic-certificate.der
+            
+            openssl x509 -outform der -in $cert_in -out $cert_out
+            yes 'password' | keytool -import -file $cert_out -noprompt -alias ElasticCert -keystore /tmp/truststore/myTrustStore.jks
+            rm $cert_out
+            exit 0
+        - name: {{ .Chart.Name }}-logs
+          image: exxeta/adoptopenjdk:8
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: efk-controller-logs
+              mountPath: /usr/share/efk-controller-logs
+          command:
+            - sh
+            - -c
+            - |
+              #!/bin/bash
+              touch /usr/share/efk-controller-logs/logs.json
+              chmod 666 /usr/share/efk-controller-logs/logs.json
+              cat >> /usr/share/efk-controller-logs/logs.json << EOF
+              {
+                "allJobs" : []
+              }
+              EOF
+              exit 0
+            
+        
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5005
+          envFrom:
+            - configMapRef:
+                name: java-k8s-operator-configmap
+          env:
+            - name: 'ELASTICSEARCH_USERNAME'
+              valueFrom:
+                secretKeyRef:
+                  name: elastic-credentials
+                  key: username
+            - name: 'ELASTICSEARCH_PASSWORD'
+              valueFrom:
+                secretKeyRef:
+                  name: elastic-credentials
+                  key: password
+
+
+          volumeMounts:
+            - name: truststore
+              mountPath: /usr/share/truststore
+              readOnly: true
+            - name: efk-controller-logs
+              mountPath: /usr/share/efk-controller-logs
+          command: ["java", "-jar", "-Djavax.net.ssl.trustStore=usr/share/truststore/myTrustStore.jks", "deployments/app.jar"]
+            
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

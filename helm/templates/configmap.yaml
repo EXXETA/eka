@@ -1,0 +1,123 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: java-k8s-operator-configmap
+  labels:
+{{ include "java-k8s-operator.labels" . | indent 4 }}
+data:
+
+  ELASTICSEARCH_MASTER_HOSTNAME: {{ .Values.ELASTICSEARCH_MASTER_HOSTNAME | squote }}
+
+  ELASTICSEARCH_MASTER_PORT: {{ .Values.ELASTICSEARCH_MASTER_PORT | squote }}
+
+  ILM_POLICY_FORCE_UPDATE: {{ .Values.ILM_POLICY_FORCE_UPDATE | squote }}
+
+  DRY_RUN: {{ .Values.DRY_RUN | squote }}
+
+  SLEEP_TIMER: {{ .Values.SLEEP_TIMER | squote }}
+
+  NAMESPACE_EXEMPTIONS: |
+    {
+      "namespaces" : [ {{ include "helm-toolkit.utils.joinListWithComma" .Values.NAMESPACE_EXEMPTIONS }} ]
+    }
+  BEATS: |
+    {
+      "beats" : [
+        {
+          "beatName":"filebeat",
+          "indexSuffix":"logs",
+          "version": "{{ .Values.FILEBEAT_VERSION  }}",
+          "fallbackIndexName":"filebeat",
+          "ilmPolicy":{
+            "name":"logs-policy",
+            "requestBody":"PUT_ILM_POLICY_LOGS_REQUEST_BODY"
+          }
+        },
+        {
+          "beatName":"metricbeat",
+          "indexSuffix":"metrics",
+          "version":"{{ .Values.METRICBEAT_VERSION  }}",
+          "fallbackIndexName":"metricbeat",
+          "ilmPolicy":{
+            "name":"metrics-policy",
+            "requestBody":"PUT_ILM_POLICY_METRICS_REQUEST_BODY"
+          }
+        }
+      ]
+    }
+  PUT_INDEX_REQUEST_BODY: |
+    {
+      "settings" : {
+        "number_of_shards" : {{ .Values.INDEX.SETTINGS.NUMBER_OF_SHARDS }},
+        "number_of_replicas" : {{ .Values.INDEX.SETTINGS.NUMBER_OF_REPLICAS }}
+      },
+      "aliases" : {
+        "$rolloverAlias" : {}
+      }
+    }
+
+  PUT_INDEX_TEMPLATE_REQUEST_BODY: |
+    {
+      "index_patterns": ["$indexPattern"],
+      "settings": {
+        "index": {
+          "lifecycle": {
+            "name": "$policyName",
+            "rollover_alias": "$rolloverAlias"
+          }
+        }
+      }
+    }
+
+  ALIAS_JSON: |
+    {
+        "aliases" : {
+          "$alias" : {}
+        }
+    }
+
+  PUT_ILM_POLICY_LOGS_REQUEST_BODY: |
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "actions": {
+              "rollover": {
+                "max_size": {{ .Values.ILM_POLICY.LOGS.ROLLOVER.MAX_SIZE | quote }},
+                "max_age": {{ .Values.ILM_POLICY.LOGS.ROLLOVER.MAX_AGE | quote }}
+              }
+            }
+          },
+          "delete": {
+            "min_age": {{ .Values.ILM_POLICY.LOGS.DELETE.MIN_AGE | quote }},
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+
+  PUT_ILM_POLICY_METRICS_REQUEST_BODY: |
+    {
+      "policy": {
+        "phases": {
+          "hot": {
+            "actions": {
+              "rollover": {
+                "max_size": {{ .Values.ILM_POLICY.METRICS.ROLLOVER.MAX_SIZE | quote }},
+                "max_age": {{ .Values.ILM_POLICY.METRICS.ROLLOVER.MAX_AGE | quote }}
+              }
+            }
+          },
+          "delete": {
+            "min_age": {{ .Values.ILM_POLICY.METRICS.DELETE.MIN_AGE | quote }},
+            "actions": {
+              "delete": {}
+            }
+          }
+        }
+      }
+    }
+
+
