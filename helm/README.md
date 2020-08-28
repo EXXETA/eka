@@ -2,7 +2,7 @@
 
 **Wichtig** 
 * Tiller muss auf dem Cluster installiert sein, damit Helm funktioniert
-* die values.yaml **muss** mitgegeben werden - Sie enthält die Default-Konfiguration
+* die values.yaml **muss** mitgegeben werden - Sie enthält die Default - Konfiguration
 
 
 Installation: ``helm install -n java-k8s-operator --values ./values.yaml . ``
