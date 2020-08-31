@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: java-k8s-operator
-  tag: 0.0.1-SNAPSHOT
+  repository: eka
+  tag: latest
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
