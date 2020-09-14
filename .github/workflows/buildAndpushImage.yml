@@ -21,6 +21,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: exxeta/eka/eka-image
+          repository: exxeta/eka/eka
           tag_with_ref: true
           dockerfile: project/Dockerfile 
