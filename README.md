@@ -31,7 +31,7 @@ und der dazu passenden ILM Policy
 * Elasticsearch Credentials und Certificate sind zugreifbar als kubectl secret
 * Thiller ist installiert
 
-1. Herunterladen des Image ```$ docker pull docker.pkg.github.com/exxeta/eka/eka-image:latest```
+1. Herunterladen des Image ```$ docker pull docker.pkg.github.com/exxeta/eka/eka:latest```
 2. Exxeta Repo zu Helm hinzufügen ```$ helm repo add exxeta https://exxeta.github.io/eka/```
 3. Helm chart ausführen ```$ helm init exxeta/eka```
 
