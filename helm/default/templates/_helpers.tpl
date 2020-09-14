@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "java-k8s-operator.name" -}}
+{{- define "eka.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "java-k8s-operator.fullname" -}}
+{{- define "eka.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "java-k8s-operator.chart" -}}
+{{- define "eka.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "java-k8s-operator.labels" -}}
-app.kubernetes.io/name: {{ include "java-k8s-operator.name" . }}
-helm.sh/chart: {{ include "java-k8s-operator.chart" . }}
+{{- define "eka.labels" -}}
+app.kubernetes.io/name: {{ include "eka.name" . }}
+helm.sh/chart: {{ include "eka.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -47,9 +47,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "java-k8s-operator.serviceAccountName" -}}
+{{- define "eka.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "java-k8s-operator.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "eka.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
