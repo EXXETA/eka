@@ -33,7 +33,7 @@ und der dazu passenden ILM Policy
 
 1. Herunterladen des Image ```$ docker pull docker.pkg.github.com/exxeta/eka/eka:latest```
 2. Exxeta Repo zu Helm hinzufügen ```$ helm repo add exxeta https://exxeta.github.io/eka/```
-3. Helm chart ausführen ```$ helm init exxeta/eka```
+3. Helm chart ausführen ```$ helm install -n eka exxeta/eka```
 
 
 
