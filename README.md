@@ -24,11 +24,6 @@ werden:
 IndexTemplates versehen den Index mit einem Rolloveralias
 und der dazu passenden ILM Policy
 
-# Build
-
-Das bauen des Dockerimages erfolgt durch Ausführen der
-**build.sh** im project/ Unterordner
-
 # Deploy in lokalen Kubernetes
 
 **Vorraussetzungen**
@@ -36,9 +31,10 @@ Das bauen des Dockerimages erfolgt durch Ausführen der
 * Elasticsearch Credentials und Certificate sind zugreifbar als kubectl secret
 * Thiller ist installiert
 
-Installation erfolgt mit ***helm/init_local.sh***
+1. Herunterladen des Image ```$ docker pull docker.pkg.github.com/exxeta/eka/eka-image:latest```
+2. Exxeta Repo zu Helm hinzufügen ```$ helm repo add exxeta https://exxeta.github.io/eka/```
+3. Helm chart ausführen ```$ helm init exxeta/eka```
 
-Deinstallation erfolgt mit ***helm/destroy_local.sh***
 
 
 # Änderungen für Release
