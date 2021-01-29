@@ -12,7 +12,7 @@
 
 
     <properties>
-        <version.k8s.client>7.0.0</version.k8s.client>
+        <version.k8s.client>9.0.2</version.k8s.client>
         <version.elastic.client>7.5.1</version.elastic.client>
         <version.maven.plugin>3.2.0</version.maven.plugin>
         <version.log4j>2.13.0</version.log4j>
